@@ -1,0 +1,38 @@
+# Dependencias y cachés del gestor de paquetes
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+
+# Variables de entorno y configuración privada local
+.env
+.env.*
+*.env
+.envrc
+.npmrc
+.netrc
+.aws/
+.ssh/
+
+# Credenciales y claves privadas
+secrets/
+credentials/
+credentials.json
+secrets.json
+service-account*.json
+serviceAccountKey*.json
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Compilación y resultados locales
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts
+*.tsbuildinfo
