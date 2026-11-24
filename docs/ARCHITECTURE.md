@@ -105,3 +105,11 @@ Destino Vercel y Supabase. Antes de publicar verificar condiciones, cuotas y dis
 | Servicios gratuitos | Verificar condiciones y límites; si no encajan, registrar impedimento sin activar pago. | Antes de aprovisionamiento/publicación. |
 
 Fuera del MVP: facturación, automatizaciones comerciales, correo, importación masiva, integraciones externas y permisos avanzados de equipo. La propuesta no inicia Fase 2; resultados funcionales NOT RUN.
+
+## Fase 3 — integración en curso
+
+La migración inicial usa `user_id` en la base de datos. El adaptador conservará `owner_id` en los contratos del dominio según D-11. Se mantienen los nombres de rutas en español, los cinco estados de la Fase 2, la relación compuesta y la restricción de borrado de clientes vinculados. El almacenamiento decimal y el límite funcional se detallan en D-12. El esquema y los permisos se documentan en [DATABASE.md](DATABASE.md).
+
+La aplicación usa Proxy para propagar cookies de Supabase Auth, con identidad verificada en servidor mediante claims. Las lecturas y acciones del CRM usan el mismo cliente que verificó la sesión. Las acciones validan los datos, escriben solo campos editables y revalidan las rutas CRM tras confirmar una fila.
+
+El dashboard calcula en céntimos sobre datos del propietario. La lectura pagina por identificador hasta agotar los resultados de PostgREST para evitar totales truncados. La carga demo es un script autenticado opt-in que opera sobre la cuenta A.

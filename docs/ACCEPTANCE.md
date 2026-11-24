@@ -65,3 +65,35 @@ Criterios entregados por Testing en `F2-QA-PLAN`, hilo `/root/f2_testing`. Todos
 | F2-10 | B | Revisar cobertura de Vitest y Testing Library. Ejecutar los scripts técnicos y Playwright según disponibilidad del entorno. Comprobar ausencia de secretos, almacenamiento alternativo, usuarios o sesiones ficticios, rutas demo privadas y flags de bypass. Distinguir fixtures de prueba del ejemplo público y registrar resultados y dependencias reales. |
 
 Pendientes de Fase 3: autenticación, aislamiento RLS, restricciones PostgreSQL, persistencia y agregados reales por usuario. Publicación HTTPS queda para su fase. Riesgos anotados: autorización por operación, mapeo de estados y dinero a PostgreSQL, precisión y límites del importe, fechas sin desfase y separación entre ejemplos y datos reales.
+
+## Fase 3
+
+Criterios entregados por Testing en F3-QA-PLAN. Pruebas inicialmente NOT RUN.
+
+| ID | Comprobación obligatoria |
+| --- | --- |
+| F3-A1 | Catálogo y SQL en base desechable. UUID, propietario Auth, unicidad compuesta, FK compuesta con RESTRICT, campos y cinco etapas. Probar alta y reasignación propias, cliente ajeno o inexistente y borrado vinculado con filas intactas. |
+| F3-A2 | Timestamps automáticos e inalterables desde la API, avance de updated_at en edición. NUMERIC(12,2), cero, un céntimo, suma exacta 0,10 + 0,20, máximo funcional vigente, rechazo de negativo y exceso. La aplicación rechaza más de dos decimales. Postgres aplica su coerción NUMERIC antes del CHECK. Fecha sin hora estable entre zonas. |
+| F3-A3 | RLS explícito y CRUD mínimo para authenticated, sin acceso efectivo de anon/PUBLIC. Matriz API de SELECT, INSERT, UPDATE y DELETE sobre ambas tablas con A/B/anónimo, propios y ajenos. Verificar filas intactas tras intentos denegados, propietario inmutable, vínculo cruzado inválido y ausencia de vías alternativas que eludan RLS. |
+| F3-A4 | Clientes SSR separados, identidad verificada por lectura y mutación, propietario derivado de sesión y contexto de usuario. Alternar A/B en mismas URLs, verificar aislamiento de caché y ausencia de credenciales privadas en cliente. Sin configuración, área privada cerrada y landing disponible. |
+| F3-B | AUTH-001 a AUTH-010. Validación, credenciales válidas e inválidas, login, cinco rutas privadas, logout, recarga y otra pestaña. Token alterado, expiración con refresh válido e inválido, cookies renovadas, redirecciones internas y ausencia de bucles. |
+| F3-C | CLIENT-001 a CLIENT-012. CRUD propio, validación servidor, búsqueda por nombre y empresa, detalle y vínculos, estados vacío/error, persistencia, confirmación, borrado restringido y respuesta genérica para ID ajeno o inexistente. |
+| F3-D | OPP-001 a OPP-012. CRUD y asociación propia, validaciones, importe y fecha, búsqueda, filtros, orden, persistencia. Cinco columnas, conteos y totales, cambio por teclado y recuperación de errores sin mostrar cambios fallidos como guardados. |
+| F3-E | DASH-001 a DASH-010. Ceros, aislamiento y datos completos más allá del límite de listado. Caso de referencia con 2 clientes, 3 abiertas, 10,30 EUR de pipeline, 70,00 EUR ganados y 66,67 % de conversión. Verificar distribución, recientes y actualización después de mutar. Datos demo sintéticos cargados bajo cuenta propia y sin sobrescribir. |
+| F3-R1 | Lint, typecheck, build, Vitest y Playwright. Mantener cobertura de 21 casos Vitest y 10 recorridos Playwright. Next con Supabase de pruebas y cobertura responsive a 375, 768 y 1280 px, teclado, foco y errores de consola. |
+
+SEC-001 a SEC-016 se verifican mediante F3-A1, F3-A3, F3-A4 y F3-B. Registrar entorno, migración, procedimiento, resultados esperados y observados, estado y evidencia depurada. La matriz API comprueba cero filas o denegación y que el propietario aún puede leer la fila intacta. El cierre requiere PASS independiente en todos los criterios obligatorios.
+
+## Fase 4 — auditoría local
+
+| ID | Criterio obligatorio |
+| --- | --- |
+| F4-01 | Edge sobre Next producción y Supabase de pruebas. Landing, cinco rutas privadas, autenticación, logout, CRUD, filtro, búsqueda, cancelación, borrado, restricción, pipeline, métricas, errores y recuperación. Evidencia previa de F3 se conserva; identificar las comprobaciones repetidas. |
+| F4-02 | Edge a 375, 768 y 1280 px. Revisar landing, login, dashboard, clientes y ficha, oportunidades y pipeline. Comprobar ancho, controles accesibles, espaciado, tablas, formularios, menú y diálogos. |
+| F4-03 | Recorrer teclado, foco visible, semántica, nombres, etiquetas, mensajes asociados y contraste en controles y estados. Referencia 4,5:1 texto normal y 3:1 para texto grande e indicadores necesarios de controles. |
+| F4-04 | Revisar sesiones, cookies, autorización, aislamiento, validación servidor, Git, logs y bundles. Matriz A/B/anónimo existente y regresión en cambios relevantes, con limpieza y salida saneada. |
+| F4-05 | Lockfile, instalación reproducible y cinco scripts estándar. Revisar advertencias de dependencia, consultas y paginación. Registrar tiempos y condiciones cuando se mida rendimiento local. |
+| F4-06 | Demo verificable en vista previa de 6 clientes, 10 oportunidades, cinco etapas y fechas distintas. Revisar opt-in y recuperación por marcador. |
+| F4-07 | README y revisión de entrega local. Documentar requisitos de GitHub, Vercel, variables, reconciliación de migración, rotación de contraseña demo y control de logs. |
+
+AC-01 y el tramo público de AC-08 quedan pendientes hasta autorización de despliegue. El cierre de la auditoría local exige dictamen PASS independiente en F4-01 a F4-07.

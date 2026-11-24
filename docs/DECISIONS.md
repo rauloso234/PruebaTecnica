@@ -14,3 +14,15 @@
 | D-10 | Comprobar las pantallas privadas en un servidor de pruebas Vite en loopback, aislado del enrutador de Next.js. | Playwright puede verificar componentes reales con fixtures, CSS y tamaños de pantalla sin abrir el CRM ni simular sesiones en la aplicación. |
 
 Referencias oficiales: [Subagentes de Codex](https://developers.openai.com/codex/subagents) y [configuración de Codex](https://developers.openai.com/codex/config-reference).
+
+## Fase 3
+
+- D-11. PostgreSQL empleará user_id como columna de propietario. El adaptador mapeará esta columna a owner_id para conservar el contrato de dominio.
+- D-12. Conservar el límite funcional de 999.999.999,99 EUR en la aplicación y en el CHECK sobre NUMERIC(12,2). Las entradas con más de dos decimales se rechazan en la aplicación. Una escritura directa a la columna está sujeta a la coerción decimal de PostgreSQL.
+
+- D-13. La migración inicial se aplicó manualmente mediante SQL Editor. Conservar el archivo exacto y reconciliar el registro de esa versión con CLI antes de cualquier db push futuro, después de comprobar la equivalencia de esquema.
+
+- D-14. Verificar identidad con `getClaims()` y compartir la instancia autenticada de Supabase entre la verificación y la operación de datos. Proxy renueva cookies de las rutas de autenticación y privadas. Cada lectura y acción del CRM verifica la sesión en servidor.
+- D-15. Los agregados del dashboard recorren las páginas de datos del propietario por UUID hasta agotar el resultado. Se conserva el cálculo en céntimos del dominio y se ordenan las oportunidades por fecha de creación para presentar las más recientes.
+- D-16. Las acciones envían solo columnas editables. PostgreSQL asigna `user_id` desde `auth.uid()`. Se revalidan las rutas afectadas cuando la escritura confirma una fila y se muestra un error ante una mutación de cero filas.
+- D-17. El propietario acepta temporalmente el riesgo de reutilizar la credencial de A expuesta durante pruebas de desarrollo. La excepción se limita a las cuentas desechables actuales. Antes de una publicación, sustituir la contraseña de demostración por otra segura y volver a verificar el registro de credenciales.
