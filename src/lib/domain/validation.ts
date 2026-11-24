@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { parseEuroCents } from "./format";
+import { euroInput, maxAmountCents, parseEuroCents } from "./format";
 import { opportunityStatuses } from "./models";
 
 function normalizeInline(value: string) {
@@ -50,10 +50,38 @@ export const opportunitySchema = z.object({
   amount: amountInput,
   status: statusSchema,
   expected_close_date: z.string().trim().pipe(z.union(
-    [z.literal(""), z.iso.date("Introduce una fecha válida.")],
+    [z.literal(""), z.iso.date("Introduce una fecha válida.").refine((value) => !value.startsWith("0000-"), "Introduce una fecha válida.")],
     { error: "Introduce una fecha válida." },
   )).transform((value) => value || null),
 }).transform(({ amount, ...draft }) => ({ ...draft, amountCents: amount }));
 
 export type ClientFields = z.input<typeof clientSchema>;
 export type OpportunityFields = z.input<typeof opportunitySchema>;
+
+export const clientDraftSchema = z.preprocess((input) => {
+  if (!input || typeof input !== "object") return input;
+  const fields = input as Record<string, unknown>;
+  return {
+    name: fields.name,
+    company: fields.company === null ? "" : fields.company,
+    email: fields.email === null ? "" : fields.email,
+    phone: fields.phone === null ? "" : fields.phone,
+    notes: fields.notes === null ? "" : fields.notes,
+  };
+}, clientSchema);
+
+export const opportunityDraftSchema = z.preprocess((input) => {
+  if (!input || typeof input !== "object") return input;
+  const fields = input as Record<string, unknown>;
+  const { amountCents } = fields;
+  const validAmount = typeof amountCents === "number" && Number.isSafeInteger(amountCents)
+    && amountCents >= 0 && amountCents <= maxAmountCents;
+  return {
+    title: fields.title,
+    client_id: fields.client_id,
+    description: fields.description === null ? "" : fields.description,
+    amount: validAmount ? euroInput(amountCents) : "",
+    status: fields.status,
+    expected_close_date: fields.expected_close_date === null ? "" : fields.expected_close_date,
+  };
+}, opportunitySchema);

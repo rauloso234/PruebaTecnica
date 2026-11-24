@@ -1,31 +1,22 @@
 import "server-only";
-import type { VerifiedSession } from "@/lib/auth/contracts";
-import { requireSession } from "@/lib/auth/session";
-import type { ClientCollection, ClientRecord, DashboardSnapshot, OpportunityCollection, Resource } from "./contracts";
 
-type CrmReader = {
-  dashboard: (session: VerifiedSession) => Promise<Resource<DashboardSnapshot>>;
-  clients: (session: VerifiedSession) => Promise<Resource<ClientCollection>>;
-  client: (session: VerifiedSession, id: string) => Promise<Resource<ClientRecord>>;
-  opportunities: (session: VerifiedSession) => Promise<Resource<OpportunityCollection>>;
-};
+import { requireSupabaseContext } from "@/lib/auth/session";
+import type { CrmContext } from "./crm-context";
+import { loadClient, loadClients, loadOpportunities } from "./crm-queries";
+import type { DashboardSnapshot, OpportunityCollection, Resource } from "./contracts";
 
-const reader: CrmReader = {
-  dashboard: async () => ({ state: "unavailable" }),
-  clients: async () => ({ state: "unavailable" }),
-  client: async () => ({ state: "unavailable" }),
-  opportunities: async () => ({ state: "unavailable" }),
-};
-
-async function load<T>(read: (session: VerifiedSession) => Promise<Resource<T>>) {
-  const session = await requireSession();
-  const resource = await read(session).catch((): Resource<T> => ({
+async function load<T>(read: (context: CrmContext) => Promise<Resource<T>>) {
+  const context = await requireSupabaseContext("read");
+  const resource = await read(context).catch((): Resource<T> => ({
     state: "error", message: "No pudimos cargar esta información. Inténtalo de nuevo más tarde.",
   }));
-  return { user: session.user, resource };
+  return { user: context.user, resource };
 }
 
-export const readDashboard = () => load(reader.dashboard);
-export const readClients = () => load(reader.clients);
-export const readClient = (id: string) => load((session) => reader.client(session, id));
-export const readOpportunities = () => load(reader.opportunities);
+export const readClients = () => load(async (context) => ({ state: "ready", data: await loadClients(context) }));
+export const readClient = (id: string) => load(async (context) => ({ state: "ready", data: await loadClient(context, id) }));
+export const readDashboard = () => load<DashboardSnapshot>(async (context) => {
+  const data = await loadOpportunities(context);
+  return { state: "ready", data: { ...data, clientCount: data.clients.length } };
+});
+export const readOpportunities = () => load<OpportunityCollection>(async (context) => ({ state: "ready", data: await loadOpportunities(context) }));

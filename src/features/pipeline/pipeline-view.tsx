@@ -95,7 +95,7 @@ export function PipelineView({ resource, actions, onRetry }: {
     <div className="space-y-6">
       <PageHeading title="Pipeline comercial" description="Sigue cada oportunidad desde el primer contacto hasta su cierre."
         action={<Button asChild><Link href="/oportunidades"><Plus aria-hidden="true" /> Gestionar oportunidades</Link></Button>} />
-      {resource.state !== "ready" && <ResourceFeedback resource={resource} onRetry={onRetry} />}
+      {resource.state !== "ready" && <ResourceFeedback resource={resource} onRetry={onRetry ?? (() => window.location.reload())} />}
       <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" aria-label="Etapas del pipeline">
         {groups.map(({ status, label, items, totalCents }) => (
           <section key={status} aria-labelledby={`stage-${status}`} className="min-w-0 rounded-xl border border-border bg-slate-100/70 p-2.5">

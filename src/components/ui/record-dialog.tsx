@@ -2,7 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Button } from "./button";
 
 const overlayClass = "fixed inset-0 z-40 bg-navy/55";
@@ -16,13 +16,26 @@ export function RecordDialog({ trigger, title, description, children }: {
 }) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  function restoreTriggerFocus(event: Event) {
+    event.preventDefault();
+    const button = triggerRef.current;
+    if (!button?.isConnected || button.disabled) return;
+    if (button.checkVisibility?.({ checkVisibilityCSS: true }) === false) return;
+
+    const { activeElement, body, documentElement } = button.ownerDocument;
+    // A navigation or another component may already have moved focus.
+    if (activeElement && activeElement !== body && activeElement !== documentElement) return;
+    button.focus({ preventScroll: true });
+  }
 
   return (
     <Dialog.Root open={open} onOpenChange={(next) => { if (!pending) setOpen(next); }}>
-      <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
+      <Dialog.Trigger asChild ref={triggerRef}>{trigger}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className={overlayClass} />
-        <Dialog.Content className={dialogClass}>
+        <Dialog.Content className={dialogClass} onCloseAutoFocus={restoreTriggerFocus}>
           <div className="mb-5 flex justify-between gap-3">
             <div>
               <Dialog.Title className="font-display text-xl font-extrabold text-navy">{title}</Dialog.Title>

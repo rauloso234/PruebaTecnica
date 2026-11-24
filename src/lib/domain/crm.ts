@@ -63,5 +63,11 @@ export function calculateDashboard(clientCount: number, opportunities: readonly 
 }
 
 export function recentOpportunities(opportunities: readonly Opportunity[], limit = 5): Opportunity[] {
-  return [...opportunities].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, limit);
+  return [...opportunities].sort(byNewest).slice(0, limit);
+}
+
+export function byNewest(a: Pick<Opportunity, "id" | "created_at">, b: typeof a) {
+  return Date.parse(b.created_at) - Date.parse(a.created_at)
+    || b.created_at.localeCompare(a.created_at)
+    || b.id.localeCompare(a.id);
 }

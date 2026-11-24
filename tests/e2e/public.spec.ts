@@ -39,7 +39,10 @@ test("las solicitudes privadas anónimas redirigen a login en el servidor", asyn
   for (const route of ["/dashboard", "/clientes", "/clientes/00000000-0000-0000-0000-000000000001", "/oportunidades", "/pipeline"]) {
     const response = await request.get(route, { maxRedirects: 0 });
     expect(response.status(), route).toBe(307);
-    expect(response.headers().location, route).toBe("/login");
+    const location = new URL(response.headers().location, response.url());
+    expect(location.pathname, route).toBe("/login");
+    expect(location.searchParams.get("next"), route).toBe(route);
+    expect(response.headers()["cache-control"], route).toContain("no-store");
   }
 });
 

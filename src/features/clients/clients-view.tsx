@@ -28,7 +28,7 @@ export function ClientsView({ resource, actions, onRetry }: {
     <div className="space-y-6">
       <PageHeading title="Clientes" description="Organiza tus contactos y consulta la actividad de cada relación comercial."
         action={ready && <NewClient actions={actions} />} />
-      {!ready ? <ResourceFeedback resource={resource} onRetry={onRetry} /> : (
+      {!ready ? <ResourceFeedback resource={resource} onRetry={onRetry ?? (() => window.location.reload())} /> : (
         <>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="w-full max-w-md">

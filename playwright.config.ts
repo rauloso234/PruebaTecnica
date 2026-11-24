@@ -19,6 +19,11 @@ export default defineConfig({
   webServer: [
     {
       command: `node node_modules/next/dist/bin/next dev --hostname ${host} --port ${port}`,
+      // Keep the public regression suite independent of local Supabase configuration.
+      env: {
+        NEXT_PUBLIC_SUPABASE_URL: "",
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+      },
       url: baseURL,
       timeout: 120_000,
       reuseExistingServer: false,

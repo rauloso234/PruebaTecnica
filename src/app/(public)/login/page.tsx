@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { ChartNoAxesCombined, PanelsTopLeft, UsersRound } from "lucide-react";
+import { signIn } from "@/features/auth/actions";
 import { LoginForm } from "@/features/auth/login-form";
+import { getPrivateDestination } from "@/lib/auth/redirects";
+import { getSupabaseConfigOrNull } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Iniciar sesión" };
 
@@ -10,7 +13,11 @@ const items = [
   { label: "Tu actividad comercial de un vistazo", icon: ChartNoAxesCombined },
 ];
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
+  const { next } = await searchParams;
+  const onSignIn = getSupabaseConfigOrNull() ? signIn.bind(null, getPrivateDestination(next)) : undefined;
   return (
     <div className="page-width grid min-h-[min(44rem,75vh)] place-items-center py-10 sm:py-14">
       <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm md:grid-cols-[.92fr_1fr]">
@@ -31,7 +38,7 @@ export default function LoginPage() {
         <section aria-labelledby="login-title" className="min-w-0 p-6 sm:p-9 lg:p-12">
           <h1 id="login-title" className="font-display text-[clamp(1.9rem,4vw,2.6rem)] leading-tight font-extrabold tracking-[-0.045em] text-navy">Iniciar sesión</h1>
           <p className="mt-2 text-base leading-relaxed text-muted-foreground">Accede a tu espacio comercial de ClientFlow.</p>
-          <LoginForm />
+          <LoginForm onSignIn={onSignIn} />
         </section>
       </div>
     </div>

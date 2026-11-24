@@ -17,7 +17,7 @@ export function ClientDetail({ resource, actions, onRetry }: {
   onRetry?: () => void;
 }) {
   if (resource.state !== "ready") {
-    return <div className="space-y-6"><PageHeading title="Ficha de cliente" description="Información de contacto y actividad asociada." /><ResourceFeedback resource={resource} onRetry={onRetry} /></div>;
+    return <div className="space-y-6"><PageHeading title="Ficha de cliente" description="Información de contacto y actividad asociada." /><ResourceFeedback resource={resource} onRetry={onRetry ?? (() => window.location.reload())} /></div>;
   }
   const { client, opportunities } = resource.data;
   if (!client) {

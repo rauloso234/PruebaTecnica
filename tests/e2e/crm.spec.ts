@@ -39,6 +39,7 @@ for (const width of [375, 768, 1280]) {
     await page.keyboard.press("Enter");
     const editor = page.getByRole("dialog", { name: "Nuevo cliente" });
     await expect(editor).toBeVisible();
+    await expect(editor.getByRole("button", { name: "Cerrar diálogo" })).toBeFocused();
     const name = editor.getByLabel("Nombre", { exact: true });
     const company = editor.getByLabel("Empresa", { exact: true });
     const nameBounds = await name.boundingBox();
@@ -55,6 +56,8 @@ for (const width of [375, 768, 1280]) {
     await page.keyboard.press("Escape");
     await expect(editor).toBeHidden();
     await expect(trigger).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("searchbox", { name: "Buscar clientes" })).toBeFocused();
 
     await page.goto(`${harnessURL}/pipeline`);
     await expect(page.getByRole("heading", { name: "Pipeline comercial" })).toBeVisible();
@@ -81,6 +84,32 @@ for (const width of [375, 768, 1280]) {
     await expect(page.getByRole("button", { name: "Aplicar etapa" })).toBeVisible();
   });
 }
+
+test("a 375 px el diálogo conserva el foco que recibe otro control al cerrar", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.goto(`${harnessURL}/clientes`);
+  const search = page.locator('input[type="search"]');
+  await expect(search).toBeVisible();
+  const trigger = page.getByRole("button", { name: "Nuevo cliente", exact: true });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const editor = page.getByRole("dialog", { name: "Nuevo cliente" });
+  await expect(editor.getByRole("button", { name: "Cerrar diálogo" })).toBeFocused();
+
+  await search.evaluate((input) => {
+    const dialog = document.querySelector('[role="dialog"]');
+    const observer = new MutationObserver(() => {
+      if (dialog?.isConnected) return;
+      observer.disconnect();
+      input.focus();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+  await page.keyboard.press("Escape");
+  await expect(editor).toBeHidden();
+  await page.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+  await expect(search).toBeFocused();
+});
 
 test("el CRM aislado comunica restricciones y confirma una operación solo tras la respuesta", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });

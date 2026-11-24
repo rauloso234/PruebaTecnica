@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { changeStatus, updateOpportunity } from "@/features/opportunities/actions";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { PipelineView } from "@/features/pipeline/pipeline-view";
 import { readOpportunities } from "@/lib/data/crm-reader";
@@ -7,5 +8,5 @@ export const metadata: Metadata = { title: "Pipeline comercial" };
 
 export default async function PipelinePage() {
   const { user, resource } = await readOpportunities();
-  return <WorkspaceShell user={user} active="pipeline"><PipelineView resource={resource} /></WorkspaceShell>;
+  return <WorkspaceShell user={user} active="pipeline"><PipelineView resource={resource} actions={{ changeStatus, updateOpportunity }} /></WorkspaceShell>;
 }

@@ -6,10 +6,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authUnavailableMessage } from "@/lib/auth/contracts";
+import { authUnavailableMessage, type SignInResult } from "@/lib/auth/contracts";
 import { loginSchema, type LoginInput } from "./login-schema";
 
-type SignInHandler = (credentials: LoginInput) => Promise<{ error: string }>;
+type SignInHandler = (credentials: LoginInput) => Promise<SignInResult>;
 
 export function LoginForm({ onSignIn }: { onSignIn?: SignInHandler }) {
   const [visible, setVisible] = useState(false);
@@ -25,7 +25,8 @@ export function LoginForm({ onSignIn }: { onSignIn?: SignInHandler }) {
     }
     try {
       const result = await onSignIn(credentials);
-      setError("root", { message: result.error });
+      if ("error" in result) setError("root", { message: result.error });
+      else window.location.replace(result.redirectTo);
     } catch {
       setError("root", { message: "No hemos podido completar el acceso. Inténtalo de nuevo." });
     }

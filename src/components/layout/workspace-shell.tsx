@@ -3,7 +3,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Columns3, LayoutDashboard, LoaderCircle, LogOut, Menu, Target, UsersRound, X } from "lucide-react";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -20,12 +20,22 @@ const nav = [
 
 export type WorkspaceSection = (typeof nav)[number]["id"];
 type WorkspaceUser = VerifiedSession["user"];
+type SignOutAction = () => Promise<Mutation>;
+
+const WorkspaceSignOutContext = createContext<SignOutAction | undefined>(undefined);
+
+export function WorkspaceSessionProvider({ signOutAction, children }: {
+  signOutAction: SignOutAction;
+  children: ReactNode;
+}) {
+  return <WorkspaceSignOutContext.Provider value={signOutAction}>{children}</WorkspaceSignOutContext.Provider>;
+}
 
 function WorkspaceNav({ active, onNavigate }: { active: WorkspaceSection; onNavigate?: () => void }) {
   return (
     <nav aria-label="Navegación del CRM" className="space-y-1">
       {nav.map(({ id, label, href, icon: Icon }) => (
-        <Link key={id} href={href} aria-current={active === id ? "page" : undefined} onClick={onNavigate}
+        <Link key={id} href={href} prefetch={false} aria-current={active === id ? "page" : undefined} onClick={onNavigate}
           className={cn("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-navy", active === id && "bg-blue-50 text-blue-800 hover:bg-blue-100 hover:text-blue-950")}>
           <Icon className="size-[18px] shrink-0" aria-hidden="true" />{label}
         </Link>
@@ -34,7 +44,7 @@ function WorkspaceNav({ active, onNavigate }: { active: WorkspaceSection; onNavi
   );
 }
 
-function UserArea({ user, onSignOut }: { user: WorkspaceUser; onSignOut?: () => Promise<Mutation> }) {
+function UserArea({ user, onSignOut }: { user: WorkspaceUser; onSignOut?: SignOutAction }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
   const label = user.displayName || user.email;
@@ -47,6 +57,7 @@ function UserArea({ user, onSignOut }: { user: WorkspaceUser; onSignOut?: () => 
     try {
       const result = await onSignOut();
       if (!result.ok) setError(result.message);
+      else window.location.replace("/login");
     } catch {
       setError("No se pudo cerrar la sesión. Inténtalo de nuevo.");
     } finally {
@@ -75,10 +86,11 @@ function UserArea({ user, onSignOut }: { user: WorkspaceUser; onSignOut?: () => 
 export function WorkspaceShell({ user, active, onSignOut, children }: {
   user: WorkspaceUser;
   active: WorkspaceSection;
-  onSignOut?: () => Promise<Mutation>;
+  onSignOut?: SignOutAction;
   children: ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const signOutAction = useContext(WorkspaceSignOutContext);
   const activeLabel = nav.find(({ id }) => id === active)?.label;
 
   return (
@@ -87,7 +99,7 @@ export function WorkspaceShell({ user, active, onSignOut, children }: {
       <aside className="sticky top-0 hidden h-dvh min-h-0 flex-col gap-8 overflow-auto border-r border-border bg-card px-4 py-5 lg:flex">
         <Brand className="text-navy" />
         <WorkspaceNav active={active} />
-        <div className="mt-auto"><UserArea user={user} onSignOut={onSignOut} /></div>
+        <div className="mt-auto"><UserArea user={user} onSignOut={onSignOut ?? signOutAction} /></div>
       </aside>
       <div className="min-w-0">
         <header className="border-b border-border bg-card">
@@ -110,7 +122,7 @@ export function WorkspaceShell({ user, active, onSignOut, children }: {
                   </div>
                   <Dialog.Description className="sr-only">Navega por tu espacio comercial.</Dialog.Description>
                   <WorkspaceNav active={active} onNavigate={() => setMenuOpen(false)} />
-                  <div className="mt-auto"><UserArea user={user} onSignOut={onSignOut} /></div>
+                  <div className="mt-auto"><UserArea user={user} onSignOut={onSignOut ?? signOutAction} /></div>
                 </Dialog.Content>
               </Dialog.Portal>
             </Dialog.Root>

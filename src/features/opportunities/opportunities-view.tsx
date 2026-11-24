@@ -33,7 +33,7 @@ export function OpportunitiesView({ resource, actions, onRetry }: {
     <div className="space-y-6">
       <PageHeading title="Oportunidades" description="Registra negociaciones y consulta el valor, la etapa y el cierre estimado de cada una."
         action={ready && <NewOpportunity clients={clients} actions={actions} />} />
-      {!ready ? <ResourceFeedback resource={resource} onRetry={onRetry} /> : (
+      {!ready ? <ResourceFeedback resource={resource} onRetry={onRetry ?? (() => window.location.reload())} /> : (
         <>
           <div className="flex flex-wrap items-end gap-3">
             <div className="w-full max-w-md sm:flex-1">
